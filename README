@@ -1,0 +1,24 @@
+CustomResourceName
+==================
+
+This is a plugin that would add an option :as to map.resources.
+
+This would help in creating customised URL's irrespective of what the resources were called.
+
+For e.g. if I want to keep my resources in English, but the URLs to talk portuguese, then:
+
+    
+  map.resources :products, :as => 'produtos' do |product|
+    product.resources :product_reviews, :as => 'comentarios'
+  end 
+  map.resources :posts, :as => 'artigos' do |tutor|
+    product.resources :post_reviews, :as => 'comentarios'
+  end 
+
+These will yield paths like the following:
+
+  produtos/:product_id/comentarios
+  artigos/:tutor_id/comentarios
+
+
+Copyright (c) 2008 Carlos Brando, released under the MIT license

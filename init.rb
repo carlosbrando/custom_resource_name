@@ -1,0 +1,1 @@
+require 'custom_resource_name'
