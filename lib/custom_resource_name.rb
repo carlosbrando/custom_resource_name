@@ -6,23 +6,23 @@ module ActionController
       def initialize(entities, options)
         @plural   ||= entities
         @singular ||= options[:singular] || plural.to_s.singularize
-        
+
         @resources_as = options.delete(:resources_as) || {}
         @actions_as = options.delete(:actions_as) || {}
-        
+
         @path_segment = options.delete(:as) || @resources_as[entities] || @plural
-        
+
         @options = options
-        
+
         arrange_actions
         add_default_actions
         set_prefixes
       end
-      
+
       def path
         @path ||= "#{path_prefix}/#{path_segment}"
       end
-      
+
       def new_path
         action_new = @actions_as[:new] || 'new'
         @new_path ||= "#{path}/#{action_new}"
@@ -101,5 +101,19 @@ module ActionController
       map.connect(resource.member_path, destroy_action_options)
       map.connect("#{resource.member_path}.:format", destroy_action_options)
     end
+
+    def map_associations(resource, options)
+      path_prefix = "#{options.delete(:path_prefix)}#{resource.nesting_path_prefix}"
+      name_prefix = "#{options.delete(:name_prefix)}#{resource.nesting_name_prefix}"
+
+      Array(options[:has_many]).each do |association|
+        resources(association, :path_prefix => path_prefix, :name_prefix => name_prefix, :namespace => options[:namespace])
+      end
+
+      Array(options[:has_one]).each do |association|
+        resource(association, :path_prefix => path_prefix, :name_prefix => name_prefix, :namespace => options[:namespace])
+      end
+    end if Rails::VERSION::MAJOR < 2
+    
   end
 end
