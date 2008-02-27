@@ -1,24 +1,25 @@
-CustomResourceName
+Custom Resource Name
 ==================
 
-This is a plugin that would add an option :as to map.resources.
+The Custom Resource Name Plugin lets you add alias for your routes. This is very useful if you are developing a software to a country that does not speak English and wants all URLs in the native language.
 
-This would help in creating customised URL's irrespective of what the resources were called.
+To install the plugin is very simple:
 
-For e.g. if I want to keep my resources in English, but the URLs to talk portuguese, then:
+./script/plugin install http://plugins.nomedojogo.com/custom_resource_name
 
-    
-  map.resources :products, :as => 'produtos' do |product|
-    product.resources :product_reviews, :as => 'comentarios'
-  end 
-  map.resources :posts, :as => 'artigos' do |tutor|
-    product.resources :post_reviews, :as => 'comentarios'
-  end 
+To use it is simpler yet. Open the file routes.rb of your project and include the following lines BEFORE the routes that should be translated:
 
-These will yield paths like the following:
+# translate resources
+map.aliases :resources, :posts => ‘artigos‘, :comments => ‘comentarios‘
 
-  produtos/:product_id/comentarios
-  artigos/:tutor_id/comentarios
+# translate actions
+map.aliases :actions, :new => ‘novo‘, :edit => ‘editar‘, :logout => ‘sair‘
 
+If you have any english route that should stay untouched, put it before the aliases definition.
 
+Ready!
+
+You can add aliases for all its resources and actions.
+
+If this plugin is interesting to you, be sure to recommend me on Working with Rails.
 Copyright (c) 2008 Carlos Brando, released under the MIT license
