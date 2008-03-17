@@ -35,7 +35,11 @@ module ActionController
       end
       
       def change_namespace(prefix)
-        @namespaces_as[prefix].to_sym if prefix && @namespaces_as.has_key?(prefix)
+        if prefix && @namespaces_as.has_key?(prefix)
+          @namespaces_as[prefix].to_sym
+        else
+          prefix
+        end
       end
     end
 
