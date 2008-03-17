@@ -65,11 +65,12 @@ module ActionController
       if args.size > 0
         options = args.extract_options!
         
-        if args[0] == :resources
-          @resources_as = options || {}
-        elsif args[0] == :actions
-          @actions_as = options || {}
-        elsif args[0] == :namespaces
+        case args[0]
+        when :resources
+          @resources_as  = options || {}
+        when :actions
+          @actions_as    = options || {}
+        when :namespaces
           @namespaces_as = options || {}
         end
       end
