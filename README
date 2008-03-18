@@ -1,11 +1,14 @@
 Custom Resource Name
-==================
+====================
 
-The Custom Resource Name Plugin lets you add alias for your routes. This is very useful if you are developing a software to a country that does not speak English and wants all URLs in the native language.
+The Custom Resource Name Plugin lets you add aliases for your routes. This is very useful if you are developing a software to a country that does not speak English and wants all URLs in the native language.
 
-To install the plugin is very simple:
+To install the plugin is very simple. The plugin is on the GitHub. If you have Git installed, take the plugin using the command:
 
-./script/plugin install http://plugins.nomedojogo.com/custom_resource_name
+git clone git://github.com/carlosbrando/custom_resource_name.git custom_resource_name
+
+If you don’t use Git (should…) you can download the plugin and then copy the files into the folder vendor/plugins of your project.
+To download: http://github.com/carlosbrando/custom_resource_name/tarball/master
 
 To use it is simpler yet. Open the file routes.rb of your project and include the following lines BEFORE the routes that should be translated:
 
@@ -15,11 +18,19 @@ map.aliases :resources, :posts => ‘artigos‘, :comments => ‘comentarios‘
 # translate actions
 map.aliases :actions, :new => ‘novo‘, :edit => ‘editar‘, :logout => ‘sair‘
 
+# translate namespaces
+map.aliases :namespaces, :admin => ‘administrativo‘
+
 If you have any english route that should stay untouched, put it before the aliases definition.
 
 Ready!
 
 You can add aliases for all its resources and actions.
 
+More info: http://www.nomedojogo.com/custom-resource-name-plugin/
+
 If this plugin is interesting to you, be sure to recommend me on Working with Rails.
+
+This plugin has been created by Carlos Brando, a developer of Surgeworks LLC.
+
 Copyright (c) 2008 Carlos Brando, released under the MIT license
