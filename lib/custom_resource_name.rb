@@ -44,7 +44,11 @@ module ActionController
     end
 
     def map_resource(entities, options = {}, &block)
-      options.merge!(:actions_as => @actions_as, :resources_as => @resources_as, :namespaces_as => @namespaces_as)
+      @actions_as ||= {}
+      actions_as = options.has_key?(:actions_as) ? @actions_as.merge(options[:actions_as]) : @actions_as
+      
+      options.merge!(:actions_as => actions_as, :resources_as => @resources_as, :namespaces_as => @namespaces_as)
+      
       resource = Resource.new(entities, options)
       
       with_options :controller => resource.controller do |map|
