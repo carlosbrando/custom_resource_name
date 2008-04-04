@@ -77,10 +77,44 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
 
+  def test_default_restful_routes_with_alias
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :messages => 'mensagens'
+        map.resources :messages
+      end
+      assert_simply_restful_for :messages, :as => 'mensagens'
+    end
+  end
+
   def test_multiple_default_restful_routes
     with_restful_routing :messages, :comments do
       assert_simply_restful_for :messages
       assert_simply_restful_for :comments
+    end
+  end
+
+  def test_multiple_default_restful_routes_with_aliases
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :messages => 'mensagens', :comments => 'comentarios'
+        map.resources :messages
+        map.resources :comments
+      end
+      assert_simply_restful_for :messages, :as => 'mensagens'
+      assert_simply_restful_for :comments, :as => 'comentarios'
+    end
+  end
+
+  def test_multiple_default_restful_routes_with_one_alias_only
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :comments => 'comentarios'
+        map.resources :messages
+        map.resources :comments
+      end
+      assert_simply_restful_for :messages
+      assert_simply_restful_for :comments, :as => 'comentarios'
     end
   end
 
@@ -99,7 +133,7 @@ class CustomResourceNameTest < Test::Unit::TestCase
       end
     end
   end
-
+  
   def test_irregular_id_with_requirements_should_pass
     expected_options = {:controller => 'messages', :action => 'show', :id => '1.1.1'}
 
@@ -121,6 +155,16 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
 
+  def test_with_path_prefix_with_alias
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :messages => 'mensagens'
+        map.resources :messages, :path_prefix => '/thread/:thread_id'
+      end
+      assert_simply_restful_for :messages, :as => 'mensagens', :path_prefix => 'thread/5/', :options => { :thread_id => '5' }
+    end
+  end
+
   def test_multiple_with_path_prefix
     with_restful_routing :messages, :comments, :path_prefix => '/thread/:thread_id' do
       assert_simply_restful_for :messages, :path_prefix => 'thread/5/', :options => { :thread_id => '5' }
@@ -128,9 +172,30 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
 
+  def test_multiple_with_path_prefix_with_alias
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :messages => 'mensagens', :comments => 'comentarios'
+        map.resources :messages, :comments, :path_prefix => '/thread/:thread_id'
+      end
+      assert_simply_restful_for :messages, :as => 'mensagens', :path_prefix => 'thread/5/', :options => { :thread_id => '5' }
+      assert_simply_restful_for :comments, :as => 'comentarios', :path_prefix => 'thread/5/', :options => { :thread_id => '5' }
+    end
+  end
+
   def test_with_name_prefix
     with_restful_routing :messages, :name_prefix => 'post_' do
       assert_simply_restful_for :messages, :name_prefix => 'post_'
+    end
+  end
+
+  def test_with_name_prefix_and_alias
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resources, :messages => 'mensagens'
+        map.resources :messages, :name_prefix => 'post_'
+      end
+      assert_simply_restful_for :messages, :name_prefix => 'post_', :as => 'mensagens'
     end
   end
 
@@ -204,19 +269,53 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
 
-  def test_with_two_member_actions_with_same_method
+  def test_with_member_action_and_aliases
     [:put, :post].each do |method|
-      with_restful_routing :messages, :member => { :mark => method, :unmark => method } do
-        %w(mark unmark).each do |action|
-          action_options = {:action => action, :id => '1'}
-          action_path    = "/messages/1/#{action}"
-          assert_restful_routes_for :messages do |options|
-            assert_recognizes(options.merge(action_options), :path => action_path, :method => method)
-          end
+      with_routing do |set|
+        set.draw do |map|
+          map.aliases :resources, :messages => 'mensagens'
+          map.aliases :actions, :mark => 'marcar'
+          map.resources :messages, :member => { :mark => method }
+        end
+        mark_options = {:action => 'mark', :id => '1'}
+        mark_path    = "/mensagens/1/marcar"
+        assert_restful_routes_for :messages, :as => 'mensagens' do |options|
+          assert_recognizes(options.merge(mark_options), :path => mark_path, :method => method)
+        end
 
-          assert_restful_named_routes_for :messages do |options|
-            assert_named_route action_path, "#{action}_message_path".to_sym, action_options
-          end
+        assert_restful_named_routes_for :messages, :as => 'mensagens' do |options|
+          assert_named_route mark_path, :mark_message_path, mark_options
+        end
+      end
+    end
+  end
+
+  def test_with_two_member_actions_with_same_method_and_aliases
+    [:put, :post].each do |method|
+      with_routing do |set|
+        set.draw do |map|
+          map.aliases :actions, :mark => 'marcar', :unmark => 'desmarcar'
+          map.resources :messages, :member => { :mark => method, :unmark => method }
+        end
+
+        assert_restful_routes_for :messages do |options|
+          action_options = {:action => 'mark', :id => '1'}
+          action_path    = "/messages/1/marcar"
+          assert_recognizes(options.merge(action_options), :path => action_path, :method => method)
+
+          action_options = {:action => 'unmark', :id => '1'}
+          action_path    = "/messages/1/desmarcar"
+          assert_recognizes(options.merge(action_options), :path => action_path, :method => method)
+        end
+
+        assert_restful_named_routes_for :messages do |options|
+          action_options = {:action => 'mark', :id => '1'}
+          action_path    = "/messages/1/marcar"
+          assert_named_route action_path, "mark_message_path".to_sym, action_options
+
+          action_options = {:action => 'unmark', :id => '1'}
+          action_path    = "/messages/1/desmarcar"
+          assert_named_route action_path, "unmark_message_path".to_sym, action_options
         end
       end
     end
@@ -264,24 +363,6 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
   
-  def test_override_new_method
-    with_restful_routing :messages do
-      assert_restful_routes_for :messages do |options|
-        assert_recognizes(options.merge(:action => "new"), :path => "/messages/new", :method => :get)
-        assert_raises(ActionController::MethodNotAllowed) do
-          ActionController::Routing::Routes.recognize_path("/messages/new", :method => :post)
-        end
-      end
-    end
-
-    with_restful_routing :messages, :new => { :new => :any } do
-      assert_restful_routes_for :messages do |options|
-        assert_recognizes(options.merge(:action => "new"), :path => "/messages/new", :method => :post)
-        assert_recognizes(options.merge(:action => "new"), :path => "/messages/new", :method => :get)
-      end
-    end
-  end
-
   def test_nested_restful_routes
     with_routing do |set|
       set.draw do |map|
@@ -494,6 +575,38 @@ class CustomResourceNameTest < Test::Unit::TestCase
     end
   end
 
+  def test_resource_action_separator_with_alias
+     with_routing do |set|
+       set.draw do |map|
+         map.aliases :resources, :messages => 'mensagens'
+         map.aliases :actions, :search => 'procurar'
+         map.resources :messages, :collection => {:search => :get}, :new => {:preview => :any}, :name_prefix => 'thread_', :path_prefix => '/threads/:thread_id'
+       end
+
+       action_separator = ActionController::Base.resource_action_separator
+
+       assert_simply_restful_for :messages, :as => 'mensagens', :name_prefix => 'thread_', :path_prefix => 'threads/1/', :options => { :thread_id => '1' }
+       assert_named_route "/threads/1/mensagens#{action_separator}procurar", "search_thread_messages_path", {}
+       assert_named_route "/threads/1/mensagens/new", "new_thread_message_path", {}
+       assert_named_route "/threads/1/mensagens/new#{action_separator}preview", "preview_new_thread_message_path", {}
+     end
+     
+     with_routing do |set|
+        set.draw do |map|
+          map.aliases :resources, :messages => 'mensagens'
+          map.aliases :actions, :search => 'procurar'
+          map.resources :messages, :actions_as => {:search => 'localizar'}, :collection => {:search => :get}, :new => {:preview => :any}, :name_prefix => 'thread_', :path_prefix => '/threads/:thread_id'
+        end
+
+        action_separator = ActionController::Base.resource_action_separator
+
+        assert_simply_restful_for :messages, :as => 'mensagens', :name_prefix => 'thread_', :path_prefix => 'threads/1/', :options => { :thread_id => '1' }
+        assert_named_route "/threads/1/mensagens#{action_separator}localizar", "search_thread_messages_path", {}
+        assert_named_route "/threads/1/mensagens/new", "new_thread_message_path", {}
+        assert_named_route "/threads/1/mensagens/new#{action_separator}preview", "preview_new_thread_message_path", {}
+      end
+   end
+
   def test_new_style_named_routes_for_resource
     with_routing do |set|
       set.draw do |map|
@@ -529,7 +642,7 @@ class CustomResourceNameTest < Test::Unit::TestCase
       assert_simply_restful_for :products, :controller => "backoffice/products", :name_prefix => 'backoffice_', :path_prefix => 'backoffice/'
     end
   end
-
+  
   def test_resource_has_many_in_namespace
     with_routing do |set|
       set.draw do |map|
@@ -668,7 +781,7 @@ class CustomResourceNameTest < Test::Unit::TestCase
     def assert_restful_routes_for(controller_name, options = {})
       options[:options] ||= {}
       options[:options][:controller] = options[:controller] || controller_name.to_s
-
+      
       collection_path            = "/#{options[:path_prefix]}#{options[:as] || controller_name}"
       member_path                = "#{collection_path}/1"
       new_path                   = "#{collection_path}/new"
