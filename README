@@ -1,5 +1,5 @@
-Custom Resource Name
-====================
+Custom Resource Name 1.2
+========================
 
 The Custom Resource Name Plugin lets you add aliases for your routes. This is very useful if you are developing a software to a country that does not speak English and wants all URLs in the native language.
 
@@ -26,6 +26,33 @@ If you have any english route that should stay untouched, put it before the alia
 Ready!
 
 You can add aliases for all its resources and actions.
+
+
+New feature
+===========
+
+Added one more feature to plugin. Imagine the following case:
+
+ActionController::Routing::Routes.draw do |map|
+  map.aliases :resources, :houses => 'casas'
+  map.aliases :actions, :new => 'novo'
+
+  map.resources :houses
+end
+
+See that all actions :new will be replaced by 'novo', but this does not fit properly in resource :casas, which would correct be 'nova' and not 'novo' (is just one example).
+
+In this case we can use the option :actions_as in the resources, like this:
+
+map.resources :houses, :actions_as => {:new => 'nova'}
+
+Problem solved. In all other cases the action :new will be called 'novo', but only in the resource :casas it will be 'nova'.
+
+In addition we also have the option :as those who do the same thing with the name of the resource.
+
+
+
+
 
 More info: http://www.nomedojogo.com/custom-resource-name-plugin/
 
