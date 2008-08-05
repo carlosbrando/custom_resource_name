@@ -47,11 +47,11 @@ module ActionController
     def map_singleton_resource(entities, options = {}, &block)
       @actions_as ||= {}
       actions_as = options.has_key?(:actions_as) ? @actions_as.merge(options[:actions_as]) : @actions_as
-      
+
       options.merge!(:actions_as => actions_as, :resources_as => @resource_as, :namespaces_as => @namespaces_as)
-      
+
       resource = SingletonResource.new(entities, options)
-      
+
       with_options :controller => resource.controller do |map|
         map_collection_actions(map, resource)
         map_default_singleton_actions(map, resource)
@@ -66,15 +66,14 @@ module ActionController
       end
     end
     
-
     def map_resource(entities, options = {}, &block)
       @actions_as ||= {}
       actions_as = options.has_key?(:actions_as) ? @actions_as.merge(options[:actions_as]) : @actions_as
-      
+
       options.merge!(:actions_as => actions_as, :resources_as => @resources_as, :namespaces_as => @namespaces_as)
-      
+
       resource = Resource.new(entities, options)
-      
+
       with_options :controller => resource.controller do |map|
         map_collection_actions(map, resource)
         map_default_collection_actions(map, resource)
