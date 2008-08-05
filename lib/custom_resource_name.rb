@@ -8,7 +8,7 @@ module ActionController
         @singular ||= options[:singular] || plural.to_s.singularize
 
         @resources_as  = options.delete(:resources_as) || {}
-        @resource_as  = options.delete(:resource_as) || {}
+        @resource_as   = options.delete(:resource_as) || {}
         @actions_as    = options.delete(:actions_as) || {}
         @namespaces_as = options.delete(:namespaces_as) || {}
         
@@ -95,7 +95,7 @@ module ActionController
         
         case args[0]
         when :resource
-          @resource_as  = options || {}
+          @resource_as   = options || {}
         when :resources
           @resources_as  = options || {}
         when :actions

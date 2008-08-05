@@ -447,12 +447,11 @@ class CustomResourceNameTest < Test::Unit::TestCase
       @request    = ActionController::TestRequest.new
       @response   = ActionController::TestResponse.new
       get :show
-      
-      
+
       full_path = "/Konto"
-      assert_named_route "/Konto",          "account_path", {}
-      assert_named_route "/Konto/new",          "new_account_path", {}
-      assert_named_route "/Konto/edit",          "edit_account_path", {}
+      assert_named_route "/Konto", "account_path", {}
+      assert_named_route "/Konto/new", "new_account_path", {}
+      assert_named_route "/Konto/edit", "edit_account_path", {}
     end
   end
 
