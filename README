@@ -15,6 +15,9 @@ To use it is simpler yet. Open the file routes.rb of your project and include th
 # translate resources
 map.aliases :resources, :posts => ‘artigos‘, :comments => ‘comentarios‘
 
+# translate singleton resources
+map.aliases :resource, :comment => 'comentario'
+
 # translate actions
 map.aliases :actions, :new => ‘novo‘, :edit => ‘editar‘, :logout => ‘sair‘
 
