@@ -422,6 +422,39 @@ class CustomResourceNameTest < Test::Unit::TestCase
       assert_singleton_restful_for :account
     end
   end
+  
+  def test_should_create_aliased_singleton_resource_routes
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resource, :account => 'Konto'
+        map.resource :account
+      end
+      with_options(:controller => 'accounts') do |controller|
+        controller.assert_routing 'Konto/new', :action => 'new'
+        controller.assert_routing 'Konto/edit', :action => 'edit'
+        controller.assert_routing 'Konto', :action => 'show'
+      end
+    end
+  end
+  
+  def test_should_create_named_routes
+    with_routing do |set|
+      set.draw do |map|
+        map.aliases :resource, :account => 'Konto'
+        map.resource :account
+      end
+      @controller = AccountsController.new
+      @request    = ActionController::TestRequest.new
+      @response   = ActionController::TestResponse.new
+      get :show
+      
+      
+      full_path = "/Konto"
+      assert_named_route "/Konto",          "account_path", {}
+      assert_named_route "/Konto/new",          "new_account_path", {}
+      assert_named_route "/Konto/edit",          "edit_account_path", {}
+    end
+  end
 
   def test_should_create_multiple_singleton_resource_routes
     with_singleton_resources :account, :logo do
